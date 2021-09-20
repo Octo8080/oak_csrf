@@ -6,6 +6,10 @@ Filled with gratitude.
 # Usage
 
 ```ts
+
+import {RedisStore} from "https://deno.land/x/sessions@v1.5.4/mod.ts";
+import {CsrfVerify} from "https://deno.land/x/oak_csrf@0.0.1/mod.ts"
+
 // Requires encryption key. It would be better to use environment variables
 const key = Deno.env.get("CSRF_KEY") as string;
 

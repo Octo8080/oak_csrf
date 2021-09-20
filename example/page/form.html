@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head> </head>
+  <body>
+    {{#csrfUnVerify}}
+      <div>
+    　　CSRF Verify is failed.
+      </div>
+    {{/csrfUnVerify}}
+    <form action="/" method="POST">
+      <input type="hidden" name="csrf_token" value="{{token}}" />
+      <input type="text" name="name" />
+      <button type="submit">Send</button>
+    </form>
+    {{#name}}
+      <div>entered {{name}}</div>
+    {{/name}}
+  </body>
+</html>

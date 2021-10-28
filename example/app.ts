@@ -6,7 +6,7 @@ import {
   RedisStore,
 } from "./deps.ts";
 
-import {CsrfVerify} from "https://deno.land/x/oak_csrf@0.0.1/mod.ts"
+import {CsrfVerify} from "https://deno.land/x/oak_csrf@0.0.4/mod.ts"
 
 const key = Deno.env.get("CSRF_KEY") as string;
 

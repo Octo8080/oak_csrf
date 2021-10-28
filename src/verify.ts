@@ -1,16 +1,13 @@
 import {
-  getCookies,
-  setCookie,
   computeHmacTokenPair,
   computeVerifyHmacTokenPair,
-  Session,
   Context,
   MemoryStore,
-  SqliteStore,
-  RedisStore,
-  WebdisStore,
-  Cookie,
   Middleware,
+  RedisStore,
+  Session,
+  SqliteStore,
+  WebdisStore,
 } from "../deps.ts";
 
 type Store = MemoryStore | SqliteStore | RedisStore | WebdisStore | null;
@@ -26,21 +23,16 @@ const getTask = async function (ctx: Context, key: string): Promise<void> {
 
   await ctx.state.session.set("csrfToken", tokenPair.tokenStr);
 
-  const cookie: Cookie = {
-    name: "cookies_token",
-    value: tokenPair.cookieStr,
-  };
-  setCookie(ctx.response, cookie);
+  ctx.cookies.set("cookies_token", tokenPair.cookieStr);
 };
 
 const postTask = async function (
   ctx: Context,
-  key: string
+  key: string,
 ): Promise<VerifyState> {
   const value = await ctx.request.body({ type: "form" }).value;
   const csrfToken = value.get("csrf_token");
-  const cookies = getCookies(ctx.request);
-
+  const cookies_token = await ctx.cookies.get("cookies_token");
   const referer = ctx.request.headers.get("referer");
 
   let state = false,
@@ -62,8 +54,16 @@ const postTask = async function (
     return { state, redirectPath, message };
   }
 
+  // トークンが無い
+  if (!cookies_token) {
+    message = "Not found cookies token into form!";
+    ctx.state.session.flash("csrfUnVerify", true);
+    redirectPath = referer;
+    return { state, redirectPath, message };
+  }
+
   // csrfトークン検証エラー
-  if (!computeVerifyHmacTokenPair(key, csrfToken, cookies.cookies_token)) {
+  if (!computeVerifyHmacTokenPair(key, csrfToken, cookies_token)) {
     message = "Not verify csrf token!";
     ctx.state.session.flash("csrfUnVerify", true);
     redirectPath = referer;
@@ -84,7 +84,7 @@ export class CsrfVerify extends Session {
   verify(): Middleware {
     const verifyFunc = async (
       ctx: Context,
-      next: () => Promise<void>
+      next: () => Promise<void>,
     ): Promise<void> => {
       const sid = await ctx.cookies.get("sid");
 

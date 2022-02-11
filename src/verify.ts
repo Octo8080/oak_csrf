@@ -78,7 +78,7 @@ export class CsrfVerify extends Session {
   private key: string;
 
   constructor(key: string, store: Store = null) {
-    super(store || null);
+    super(store as any);
     this.key = key;
   }
   verify(): Middleware {
